@@ -1,0 +1,190 @@
+// CSS 305 - Autumn 2013
+// Assignment 5 - PowerPaint
+
+package model;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+
+/**
+ * The Menu Bar specific to PowerPaint.
+ * Don't look in here it's kinda messy.
+ * @author Joshua Moore
+ * @version 11/14/13
+ *
+ */
+@SuppressWarnings("serial")
+public class PaintMenuBar extends JMenuBar {
+    
+    /**
+     * The thicknesses available for stroke size.
+     */
+    private static final int[] THICKNESS = {1, 2, 4, 8, 16, 256};
+    
+    /**
+     * The Message displayed when About is selected.
+     */
+    private static final String ABOUT_MESSAGE = 
+            "TCSS 305 PowerPaint, Autumn 2013";
+    
+    /**
+     * Class that contains methods to easily create new items.
+     */
+    private final MenuBar myMenuCreator;
+    
+    /**
+     * Reference to the frame thats being closed.
+     */
+    private final JFrame myFrame;
+    
+    /**
+     * Creates a new PaintMenuBar.
+     * @param theFrame reference to the JFrame this bar will be attached to.
+     */
+    public PaintMenuBar(final JFrame theFrame) {
+        super();
+        myMenuCreator = new MenuBar();
+        myFrame = theFrame;
+        start();
+    }
+    
+    /**
+     * creates and adds all of the menus and items.
+     */
+    private void start() {     
+        final JMenu file = myMenuCreator.createMenu("File", KeyEvent.VK_F);
+        file.add(myMenuCreator.createMenuItem("Clear", KeyEvent.VK_C, new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                firePropertyChange("Clear", "old value", "new Value");
+
+            }
+            
+        }));
+        file.addSeparator();
+        file.add(myMenuCreator.createMenuItem("Exit", new ExitAction("Exit", KeyEvent.VK_X)));
+            
+        add(file);
+        
+        final JMenu options = myMenuCreator.createMenu("Options", KeyEvent.VK_O);
+        add(options);
+        options.add(myMenuCreator.createCheckItem("Grid", KeyEvent.VK_G, new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                boolean myIsEnabled = ((JCheckBoxMenuItem) theEvent.getSource()).isEnabled();
+                firePropertyChange("Grid", myIsEnabled, !myIsEnabled);
+            }
+        }));
+        final JMenu thick = myMenuCreator.createMenu("Thickness", KeyEvent.VK_T);
+        final ButtonGroup thickGroup = new ButtonGroup();
+        for (final int t: THICKNESS) {
+            JRadioButtonMenuItem item = myMenuCreator.createRadioItem(""+t);
+            item.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent theEvent) {
+                    firePropertyChange("Stroke", null, t);            
+                }
+                
+            });
+            thick.add(item);
+            thickGroup.add(item);
+            if (t == 1) {
+                thickGroup.setSelected(item.getModel(), true);
+            }
+            
+        }
+        options.add(thick);
+        
+        final JMenu tools = myMenuCreator.createMenu("Tools", KeyEvent.VK_T);
+        final List<JMenuItem> radios = new ArrayList<JMenuItem>();
+        for (Tool t:Tool.values()) {
+            if (t.isGrouped()) {
+                radios.add(myMenuCreator.createRadioItem(t.toString(), t.getAction()));
+            } else {
+                radios.add(myMenuCreator.createMenuItem(t.toString(), t.getAction(), Color.BLACK));
+            }                   
+        }
+        
+        radios.get(1).setSelected(true);
+        tools.add(radios.get(0));
+        tools.addSeparator();
+        for (int i = 1; i < radios.size(); i++) {
+            tools.add(radios.get(i));
+        }
+
+        add(tools);
+       
+        final JMenu help = myMenuCreator.createMenu("Help", KeyEvent.VK_H);
+        help.add(myMenuCreator.createMenuItem("About", 
+                         new DisplayMessage("About", KeyEvent.VK_A, this)));
+        add(help);
+    }
+    
+    /**
+     * 
+     * @author moorejj
+     *
+     */
+    @SuppressWarnings("serial")
+    private class ExitAction extends AbstractAction {    
+        public ExitAction (String theName, final int theCode) {
+            putValue(Action.NAME, theName);
+            putValue(Action.MNEMONIC_KEY, theCode);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            myFrame.dispose();
+            
+        }   
+    }
+    
+    private class DisplayMessage extends AbstractAction{
+        
+        Component myItem;
+        
+        public DisplayMessage (final String theName, final int theCode,
+                               final Component theItem){
+            putValue(Action.NAME, theName);
+            putValue(Action.MNEMONIC_KEY, theCode);
+            myItem = theItem;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JOptionPane.showMessageDialog(myItem, ABOUT_MESSAGE);
+        }
+        
+    }
+    
+    private class Clear extends AbstractAction{
+                
+        public Clear (final String theName, final int theCode){
+            putValue(Action.NAME, theName);
+            putValue(Action.MNEMONIC_KEY, theCode);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent theEvent) {
+            firePropertyChange("Clear", "old value", "new Value");
+        }
+        
+    }
+}

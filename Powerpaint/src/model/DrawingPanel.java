@@ -1,0 +1,277 @@
+// CSS 305 - Autumn 2013
+// Assignment 5 - PowerPaint
+
+package model;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import javax.swing.Action;
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
+
+/**
+ * JPanel that listens to mouse events (and property change events)
+ * and can be drawn on.
+ * 
+ * @author Joshua Moore
+ * @version 11/14/13
+ *
+ */
+@SuppressWarnings("serial")
+public class DrawingPanel extends JPanel implements PropertyChangeListener {
+    
+    /**
+     * Default start Tool. 
+     */
+    private static final Tool DEFAULT_START_TOOL = Tool.PENCIL;
+    
+    
+    /**
+     * The Default space between grid lines.
+     */
+    private static final int GRID_SPACE = 10;
+    
+    /**
+     * The starting position of a tool action.
+     */
+    private Point myStartPoint;
+   
+    /**
+     * the ending or intermediary position of a tool action.
+     */
+    private Point myEndPoint;
+    
+    /**
+     * The size of the the graphics' stroke.
+     */
+    private int myStrokeSize;
+    
+    /**
+     * The color of the painted graphics.
+     */
+    private Color myColor;
+    
+    /**
+     * Holds the Action the current tool.
+     * Allows the DrawingPanel to know which Action to use.
+     */
+    private Action myToolAction;
+    
+    /**
+     * Is the grid currently on?
+     */
+    private boolean myIsGrid;
+   
+    
+    /**
+     * Keeps tracks of the mouse status, is it being dragged or not?
+     * Needed so repaint only redraws a shape when it needs to.
+     */
+    private boolean myIsDragging;
+    
+    /**
+     * Keeps track of the current graphics in the panel.
+     * Also used for undo.
+     */
+    private Deque<Painting> myDrawings;
+    
+    /**
+     * Keeps track of what's been moved out of myDrawings for redoing.
+     */
+    private Deque<Painting> myRedo;
+    
+    /**
+     * 
+     */
+    private Shape myShape;
+    
+    /**
+     * Creates a new Drawing Panel.
+     * NOTE:    Checkstyle warning present, unable to comply at this time.
+     * @param theSize the starting size of the panel.
+     */
+    public DrawingPanel(final Dimension theSize) {
+        super();
+        
+        setPreferredSize(theSize);
+        setBackground(Color.WHITE);
+        
+        myStartPoint = null;
+        myEndPoint = null;
+        myColor = Color.BLACK;
+        myToolAction = DEFAULT_START_TOOL.getAction();
+        myDrawings = new ArrayDeque<Painting>();
+        myRedo = new ArrayDeque<Painting>();
+        myStrokeSize = 1;
+        myIsGrid = false;
+        myIsDragging = false;
+        
+        addMouseListener(new PanelListener());
+        addMouseMotionListener(new PanelListener());
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void paintComponent(final Graphics theGraphics) {
+
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        for (int i = 0; i < myDrawings.size(); i++) {
+            final Painting p = myDrawings.remove();
+            p.redraw(g2d);
+            myDrawings.add(p);
+        }      
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                           RenderingHints.VALUE_ANTIALIAS_ON);
+        myColor = ColorAction.getColor();
+        g2d.setPaint(myColor);
+        g2d.setStroke(new BasicStroke(myStrokeSize));
+      
+        if (myIsDragging) {
+            if (myShape != null) {
+                g2d.draw(myShape);
+            } 
+        }
+        
+        if (myIsGrid) {
+            drawGrid(g2d);
+        }               
+    }
+     
+ /*---------- Property Change----------------------------------------------------- */
+
+  /**
+   * Handles all property changes fired at the panel.  
+   * @param theEvent the change event was fired.
+   */
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent) {
+        if ("Tool".equals(theEvent.getPropertyName())) {
+            myToolAction = (AbstractPaintAction) theEvent.getNewValue();
+        }
+        if ("Clear".equals(theEvent.getPropertyName())) {
+            myDrawings.clear();
+            myRedo.clear();
+            repaint();
+        }
+        if ("Stroke".equals(theEvent.getPropertyName())) {
+            myStrokeSize = (int) theEvent.getNewValue();
+        }
+        if ("Grid".equals(theEvent.getPropertyName())) {
+            myIsGrid = !myIsGrid;
+            repaint();
+        }        
+        if ("Undo".equals(theEvent.getPropertyName())) {
+            if (!myDrawings.isEmpty()) {
+                myRedo.push(myDrawings.pop());
+            } 
+            repaint();
+        }
+        if ("Redo".equals(theEvent.getPropertyName())) {
+            if (!myRedo.isEmpty()) {
+                myDrawings.push(myRedo.remove());
+            }
+            repaint();
+        }
+    }
+
+ /*---------- Private Helpers----------------------------------------------------- */
+
+    /**
+     * Creates a new grid.
+     * @param theG the graphics the grid will draw on
+     */
+    private void drawGrid(final Graphics2D theG) {
+        theG.setColor(Color.GRAY);
+        theG.setStroke(new BasicStroke(1));
+        final int height = getHeight();
+        final int width = getWidth();
+        for (int i = 0; i <= width; i += GRID_SPACE) {
+            theG.drawLine(i, 0, i, height);
+        }
+        
+        for (int i = 0; i <= height; i += GRID_SPACE) {
+            theG.drawLine(0, i, width, i);
+        }
+    }
+    
+ 
+ /*---------- Inner Class----------------------------------------------------- */
+    /**
+     * Listens to the mouse input and reports the mouse positions.
+     * @author Joshua Moore
+     *
+     */
+    private class PanelListener extends MouseInputAdapter {
+        
+        /**
+         * Records the mousePressexd location as myStartPoint
+         * and makes the shape.
+         * @param theEvent the event that triggered the mouse.
+         */
+        @Override
+        public void mousePressed(final MouseEvent theEvent) {
+            myStartPoint = theEvent.getPoint(); 
+            myEndPoint = myStartPoint;
+            makeShape();                                                            
+        }
+        
+        /**
+         * When the mouse is released set the end point, create the shape,
+         * and fire a propertyChange.
+         * @param theEvent the event that triggered the mouse.
+         */
+        @Override
+        public void mouseReleased(final MouseEvent theEvent) {
+            myIsDragging = false;
+            myEndPoint = theEvent.getPoint();
+            makeShape();
+
+            if (myToolAction != null) {
+                myDrawings.add(new Painting(myColor, myStrokeSize, myShape));
+            }
+            repaint();
+            //lets listeners know that the mouse is released, specifically for pencilAction
+            firePropertyChange("MouseRelease", false, true);
+            //After repainting dispose of the points to not create unnecessary 
+            //repaints of a shape.
+            myStartPoint = null;
+            myEndPoint = null;
+        }
+
+        /**
+         * Records the mouseDraged location as myStartPoint
+         * and makes the shape.
+         * @param theEvent the event that triggered the mouse.
+         */
+        @Override
+        public void mouseDragged(final MouseEvent theEvent) {
+            myIsDragging = true;
+            myEndPoint = theEvent.getPoint();
+            makeShape();           
+            repaint();
+        } 
+        
+        /**
+         * Helper, makes a new shape.
+         */
+        private void makeShape() { 
+            myShape = ((AbstractPaintAction) 
+                    myToolAction).createGraphics(new Point(myStartPoint), 
+                                                 new Point(myEndPoint));
+        }
+    }
+}

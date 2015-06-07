@@ -1,0 +1,8 @@
+A B 12
+A C 4
+A D 2
+B C 6
+B D 11
+C D 1
+E A 4
+E B 6

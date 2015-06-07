@@ -1,0 +1,21 @@
+Assignment name: Assignment 5 Part B - PowerPaint 
+TCSS 305: Programming Practicum, Autumn 2013
+
+Name: Joshua Moore
+UWNetID: moorejj
+Subversion Revision Number:
+
+Assignment Overview:
+
+
+
+Technical Impression:
+
+-Explain any Static methods
+	-getColor(), CHOSER is static so it makes sense
+-Explain enum 
+-Explain propertyChangeListener on Actions.
+-ColorAction's createGraphics is useless maybe I need to restructure the hierarchy
+-when doing Pencil, and the troubles i had with it, i realized that when repaint was called all if my shapes were being redrawn unessisarily, so i added a boolean 
+
+-It got a little convoluted at the end, with a ton of propertyChange events and such

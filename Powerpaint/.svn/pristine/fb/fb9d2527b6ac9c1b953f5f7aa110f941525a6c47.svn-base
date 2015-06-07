@@ -1,0 +1,17 @@
+Assignment name: Assignment 5 Part B - PowerPaint 
+TCSS 305: Programming Practicum, Autumn 2013
+
+Name: Joshua Moore
+UWNetID: moorejj
+Subversion Revision Number:
+
+Assignment Overview:
+
+
+
+Technical Impression:
+
+-Explain any Static methods
+	-getColor(), CHOSER is static so it makes sense
+-Explain enum 
+-Explain propertyChangeListener on Actions.

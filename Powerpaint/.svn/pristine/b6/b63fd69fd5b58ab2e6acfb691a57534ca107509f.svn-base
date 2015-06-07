@@ -1,0 +1,15 @@
+Assignment name: Assignment 5 - PowerPaint 
+TCSS 305: Programming Practicum, Autumn 2013
+
+Name: Joshua Moore
+UWNetID: moorejj
+Subversion Revision Number:25
+(REMEMBER to perform an 'update' on your project to get the latest revision number - use the revision number from your PROJECT, not from a file inside your project. The subversion revision number entered here should not include any leading spaces or any other special characters . Place the revision number on the same line and immediately after the label "Subversion Revision Number:" shown above.)
+
+Assignment Overview:
+
+The PowerPaint assignment asks us to make the GUI and back end off what is basically a simple Paint knock-off. The programs allows the user to draw straight lines with the line tool, draw free-form lines with the pencil tool, and draw rectangles and ellipse with the rectangle and ellipse tools respectively. All of this can be done in different colors chosen with the color tool. There are also a few options in the menu bar like the thickness of lines and a grid. The first part of this assignment focuses on the GUI aspect of the program. We have the get all the menu items: File, Option, Tools, and Help, with all of their sub-items and buttons on the menu bar. And we have to create the tool bar with all of the tools in it and the drawing panel in the center. Most the most part the buttons and items just have be there and look correct. The only functionality that must be present is: the line tool needs to work. For this assignment external appearance is the only thing that matters: it is not graded on internal correctness at all.
+
+Technical Impression:
+
+One I started to get done with the basic GUI set up this assignment started to confuse me quite a bit. Much of the initial confusion came from software design. I got caught up with which classes to make and how to make them, what they should implement and what they should extend. I confused myself to no end with this, because I was still unsure exactly how all the classes I needed to use worked. So I ended up just deciding to take advantage of how the grading for part A works and write the program in any way that would work, ugly and redundant or otherwise. I actually got the line tool finished plus the radio button and tool bar linked together because at first I thought we had to. Although I know planning first saves time in the long run, I found that after I brute forced my way to a decent start on the program I had a much better idea how I should structure the project. I may spend an extra couple hours simply cleaning up my code, but for me, someone who was a little confused about how to do some things in the assignment, just going for it and figuring out as I went was very beneficial. I did a decent amount of trial and error getting line to work properly. I honestly don't remember what exactly I had to change to go from a non-functioning line draw class and one that worked. I just remember a lot of small changes that made it eventually work. I'm a little worried that after all of that I missed some small detail, but as far as I can tell I got everything to look and work as it's supposed to.

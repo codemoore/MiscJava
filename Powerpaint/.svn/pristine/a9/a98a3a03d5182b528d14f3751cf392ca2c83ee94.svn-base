@@ -1,0 +1,39 @@
+// CSS 305 - Autumn 2013
+// Assignment 5 - PowerPaint
+
+
+package model;
+
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Shape;
+import java.awt.event.ActionEvent;
+
+/**
+ * @author Joshua Moore
+ * @version 11/14/13
+ *
+ */
+@SuppressWarnings("serial")
+public class UndoAction extends AbstractPaintAction {
+    
+    
+
+    public UndoAction(String theName, int theCode) {
+        super(theName, theCode);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent theEvent){
+        firePropertyChange("Undo", null, ((Component)theEvent.getSource()));     
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public Shape createGraphics(Point theP1, Point theP2) {
+        return null;
+    }
+
+}
